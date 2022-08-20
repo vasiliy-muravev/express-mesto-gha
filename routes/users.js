@@ -11,4 +11,6 @@ usersRoutes.get('/users/:userId', getUserById);
 /* Создаёт пользователя */
 usersRoutes.post('/users', createUser);
 
+/* Обновляет профиль */
+
 module.exports = usersRoutes;
