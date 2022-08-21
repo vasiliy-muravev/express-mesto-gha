@@ -9,10 +9,17 @@ module.exports.getUsers = (req, res) => {
 module.exports.getUserById = (req, res) => {
   const { userId } = req.params;
   User.findById(userId)
+    .orFail(() => {
+      const error = new Error();
+      error.statusCode = 404;
+      throw error;
+    })
     .then((user) => res.status(200).send({ data: user }))
     .catch((error) => {
       if (error.name === 'CastError') {
-        res.status(404).send({ message: 'Пользователь с указанным _id не найден' });
+        res.status(400).send({ message: 'Пользователь с указанным _id не найден' });
+      } else if (error.statusCode === 404) {
+        res.status(error.statusCode).send({ message: 'Пользователь по заданному id отсутствует в базе' });
       } else {
         res.status(500).send({ message: `Internal server error ${error}` });
       }
