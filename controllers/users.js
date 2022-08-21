@@ -17,9 +17,9 @@ module.exports.getUserById = (req, res) => {
     .then((user) => res.status(200).send({ data: user }))
     .catch((error) => {
       if (error.name === 'CastError') {
-        res.status(400).send({ message: 'Пользователь с указанным _id не найден' });
+        res.status(400).send({ message: `Пользователь с указанным _id не найден ${error}` });
       } else if (error.statusCode === 404) {
-        res.status(error.statusCode).send({ message: 'Пользователь по заданному id отсутствует в базе' });
+        res.status(error.statusCode).send({ message: `Пользователь по заданному id отсутствует в базе ${error}` });
       } else {
         res.status(500).send({ message: `Internal server error ${error}` });
       }
@@ -32,7 +32,7 @@ module.exports.createUser = (req, res) => {
     .then((user) => res.status(201).send({ data: user }))
     .catch((error) => {
       if (error.name === 'ValidationError') {
-        res.status(400).send({ message: 'Переданы некорректные данные для создания пользователя' });
+        res.status(400).send({ message: `Переданы некорректные данные для создания пользователя ${error}` });
       } else {
         res.status(500).send({ message: `Internal server error ${error}` });
       }
@@ -42,10 +42,17 @@ module.exports.createUser = (req, res) => {
 module.exports.updateUser = (req, res) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true })
+    .orFail(() => {
+      const error = new Error();
+      error.statusCode = 404;
+      throw error;
+    })
     .then((user) => res.send({ data: user }))
     .catch((error) => {
-      if (error.name === 'CastError') {
-        res.status(400).send({ message: 'Пользователь с указанным _id не найден' });
+      if (error.name === 'ValidationError') {
+        res.status(400).send({ message: `Переданы некорректные данные для создания пользователя ${error}` });
+      } else if (error.statusCode === 404) {
+        res.status(error.statusCode).send({ message: `Пользователь по заданному id отсутствует в базе ${error}` });
       } else {
         res.status(500).send({ message: `Internal server error ${error}` });
       }
@@ -58,7 +65,7 @@ module.exports.updateUserAvatar = (req, res) => {
     .then((user) => res.send({ data: user }))
     .catch((error) => {
       if (error.name === 'CastError') {
-        res.status(400).send({ message: 'Пользователь с указанным _id не найден' });
+        res.status(400).send({ message: `Пользователь с указанным _id не найден ${error}` });
       } else {
         res.status(500).send({ message: `Internal server error ${error}` });
       }
