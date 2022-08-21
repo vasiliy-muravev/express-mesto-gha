@@ -5,6 +5,7 @@ const {
   createCard,
   deleteCard,
   likeCard,
+  dislikeCard,
 } = require('../controllers/cards');
 
 /* Возвращает все карточки */
@@ -18,5 +19,8 @@ cardsRoutes.delete('/cards/:cardId', deleteCard);
 
 /* Поставить лайк карточке */
 cardsRoutes.put('/cards/:cardId/likes', likeCard);
+
+/* Убрать лайк с карточки  */
+cardsRoutes.delete('/cards/:cardId/likes', dislikeCard);
 
 module.exports = cardsRoutes;
