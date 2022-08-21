@@ -2,13 +2,13 @@ const cardsRoutes = require('express').Router();
 
 const { getCards, createCard, deleteCard } = require('../controllers/cards');
 
-/* Возвращает всех пользователей */
+/* Возвращает все карточки */
 cardsRoutes.get('/cards', getCards);
 
-/* Возвращает пользователя по _id */
+/* Создаёт карточку */
 cardsRoutes.post('/cards', createCard);
 
-/* Создаёт пользователя */
+/* Удаляет карточку по идентификатору */
 cardsRoutes.delete('/cards/:cardId', deleteCard);
 
 module.exports = cardsRoutes;

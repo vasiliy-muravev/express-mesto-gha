@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 
 const app = express();
 const usersRoutes = require('./routes/users');
+const cardsRoutes = require('./routes/cards');
 
 mongoose.connect('mongodb://127.0.0.1:27017/mestodb');
 
@@ -18,5 +19,6 @@ app.use((req, res, next) => {
 });
 
 app.use('/', usersRoutes);
+app.use('/', cardsRoutes);
 
 app.listen(3000);
