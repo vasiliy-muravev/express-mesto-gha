@@ -1,5 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const { ERROR_CODE_404 } = require('./constants/errorCode');
 
 const app = express();
 const usersRoutes = require('./routes/users');
@@ -18,11 +19,11 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use('/', usersRoutes);
-app.use('/', cardsRoutes);
+app.use('/users', usersRoutes);
+app.use('/cards', cardsRoutes);
 
 app.use((req, res) => {
-  res.status(404).send({ message: 'Страница по указанному маршруту не найдена' });
+  res.status(ERROR_CODE_404).send({ message: 'Страница по указанному маршруту не найдена' });
 });
 
 app.listen(3000);

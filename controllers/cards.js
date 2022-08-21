@@ -1,9 +1,10 @@
 const Card = require('../models/card');
+const { ERROR_CODE_400, ERROR_CODE_404, ERROR_CODE_500 } = require('../constants/errorCode');
 
 module.exports.getCards = (req, res) => {
   Card.find({})
     .then((cards) => res.send({ data: cards }))
-    .catch((error) => res.status(500).send({ message: `Internal server error ${error}` }));
+    .catch(() => res.status(ERROR_CODE_500).send({ message: 'Internal server error' }));
 };
 
 module.exports.createCard = (req, res) => {
@@ -12,9 +13,10 @@ module.exports.createCard = (req, res) => {
     .then((card) => res.status(201).send({ data: card }))
     .catch((error) => {
       if (error.name === 'ValidationError') {
-        res.status(400).send({ message: `Переданы некорректные данные для создания карточки ${error}` });
+        res.status(ERROR_CODE_400)
+          .send({ message: `Переданы некорректные данные для создания карточки ${error.message}` });
       } else {
-        res.status(500).send({ message: `Internal server error ${error}` });
+        res.status(ERROR_CODE_500).send({ message: 'Internal server error' });
       }
     });
 };
@@ -24,17 +26,17 @@ module.exports.deleteCard = (req, res) => {
   Card.findByIdAndDelete(cardId)
     .orFail(() => {
       const error = new Error();
-      error.statusCode = 404;
+      error.statusCode = ERROR_CODE_404;
       throw error;
     })
     .then((card) => res.send({ data: card }))
     .catch((error) => {
       if (error.name === 'CastError') {
-        res.status(400).send({ message: `Удаление карточки с некорректным id ${error}` });
-      } else if (error.statusCode === 404) {
-        res.status(error.statusCode).send({ message: `Удаление карточки с несуществующим в БД id ${error}` });
+        res.status(ERROR_CODE_400).send({ message: 'Удаление карточки с некорректным id' });
+      } else if (error.statusCode === ERROR_CODE_404) {
+        res.status(error.statusCode).send({ message: 'Удаление карточки с несуществующим в БД id' });
       } else {
-        res.status(500).send({ message: `Internal server error ${error}` });
+        res.status(ERROR_CODE_500).send({ message: 'Internal server error' });
       }
     });
 };
@@ -48,17 +50,17 @@ module.exports.likeCard = (req, res) => {
   )
     .orFail(() => {
       const error = new Error();
-      error.statusCode = 404;
+      error.statusCode = ERROR_CODE_404;
       throw error;
     })
     .then((card) => res.send({ data: card }))
     .catch((error) => {
       if (error.name === 'CastError') {
-        res.status(400).send({ message: `Добавление лайка с некорректным id карточки ${error}` });
-      } else if (error.statusCode === 404) {
-        res.status(error.statusCode).send({ message: `Добавление лайка с несуществующим в БД id карточки ${error}` });
+        res.status(ERROR_CODE_400).send({ message: 'Добавление лайка с некорректным id карточки' });
+      } else if (error.statusCode === ERROR_CODE_404) {
+        res.status(error.statusCode).send({ message: 'Добавление лайка с несуществующим в БД id карточки' });
       } else {
-        res.status(500).send({ message: `Internal server error ${error}` });
+        res.status(ERROR_CODE_500).send({ message: 'Internal server error' });
       }
     });
 };
@@ -72,17 +74,17 @@ module.exports.dislikeCard = (req, res) => {
   )
     .orFail(() => {
       const error = new Error();
-      error.statusCode = 404;
+      error.statusCode = ERROR_CODE_404;
       throw error;
     })
     .then((card) => res.send({ data: card }))
     .catch((error) => {
       if (error.name === 'CastError') {
-        res.status(400).send({ message: `Удаление лайка с некорректным id карточки ${error}` });
-      } else if (error.statusCode === 404) {
-        res.status(error.statusCode).send({ message: `Удаление лайка с несуществующим в БД id карточки ${error}` });
+        res.status(ERROR_CODE_400).send({ message: 'Удаление лайка с некорректным id карточки' });
+      } else if (error.statusCode === ERROR_CODE_404) {
+        res.status(error.statusCode).send({ message: 'Удаление лайка с несуществующим в БД id карточки' });
       } else {
-        res.status(500).send({ message: `Internal server error ${error}` });
+        res.status(ERROR_CODE_500).send({ message: 'Internal server error' });
       }
     });
 };

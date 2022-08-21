@@ -9,18 +9,18 @@ const {
 } = require('../controllers/users');
 
 /* Возвращает всех пользователей */
-usersRoutes.get('/users', getUsers);
+usersRoutes.get('/', getUsers);
 
 /* Возвращает пользователя по _id */
-usersRoutes.get('/users/:userId', getUserById);
+usersRoutes.get('/:userId', getUserById);
 
 /* Создаёт пользователя */
-usersRoutes.post('/users', createUser);
+usersRoutes.post('/', createUser);
 
 /* Обновляет профиль */
-usersRoutes.patch('/users/me', updateUser);
+usersRoutes.patch('/me', updateUser);
 
 /* Обновляет профиль */
-usersRoutes.patch('/users/me/avatar', updateUserAvatar);
+usersRoutes.patch('/me/avatar', updateUserAvatar);
 
 module.exports = usersRoutes;

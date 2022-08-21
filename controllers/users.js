@@ -1,9 +1,10 @@
 const User = require('../models/user');
+const { ERROR_CODE_400, ERROR_CODE_404, ERROR_CODE_500 } = require('../constants/errorCode');
 
 module.exports.getUsers = (req, res) => {
   User.find({})
     .then((users) => res.send({ data: users }))
-    .catch((error) => res.status(500).send({ message: `Internal server error ${error}` }));
+    .catch(() => res.status(ERROR_CODE_500).send({ message: 'Internal server error' }));
 };
 
 module.exports.getUserById = (req, res) => {
@@ -11,17 +12,17 @@ module.exports.getUserById = (req, res) => {
   User.findById(userId)
     .orFail(() => {
       const error = new Error();
-      error.statusCode = 404;
+      error.statusCode = ERROR_CODE_404;
       throw error;
     })
-    .then((user) => res.status(200).send({ data: user }))
+    .then((user) => res.send({ data: user }))
     .catch((error) => {
       if (error.name === 'CastError') {
-        res.status(400).send({ message: `Получение пользователя с некорректным id ${error}` });
-      } else if (error.statusCode === 404) {
-        res.status(error.statusCode).send({ message: `Получение пользователя с несуществующим в БД id ${error}` });
+        res.status(ERROR_CODE_400).send({ message: 'Получение пользователя с некорректным id' });
+      } else if (error.statusCode === ERROR_CODE_404) {
+        res.status(error.statusCode).send({ message: 'Получение пользователя с несуществующим в БД id' });
       } else {
-        res.status(500).send({ message: `Internal server error ${error}` });
+        res.status(ERROR_CODE_500).send({ message: 'Internal server error' });
       }
     });
 };
@@ -32,9 +33,10 @@ module.exports.createUser = (req, res) => {
     .then((user) => res.status(201).send({ data: user }))
     .catch((error) => {
       if (error.name === 'ValidationError') {
-        res.status(400).send({ message: `Переданы некорректные данные для создания пользователя ${error}` });
+        res.status(ERROR_CODE_400)
+          .send({ message: `Переданы некорректные данные для создания пользователя ${error.message}` });
       } else {
-        res.status(500).send({ message: `Internal server error ${error}` });
+        res.status(ERROR_CODE_500).send({ message: 'Internal server error' });
       }
     });
 };
@@ -44,17 +46,18 @@ module.exports.updateUser = (req, res) => {
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
     .orFail(() => {
       const error = new Error();
-      error.statusCode = 404;
+      error.statusCode = ERROR_CODE_404;
       throw error;
     })
     .then((user) => res.send({ data: user }))
     .catch((error) => {
       if (error.name === 'ValidationError') {
-        res.status(400).send({ message: `Переданы некорректные данные для создания пользователя ${error}` });
-      } else if (error.statusCode === 404) {
-        res.status(error.statusCode).send({ message: `Получение пользователя с несуществующим в БД id ${error}` });
+        res.status(ERROR_CODE_400)
+          .send({ message: `Переданы некорректные данные для изменения данных пользователя ${error.message}` });
+      } else if (error.statusCode === ERROR_CODE_404) {
+        res.status(error.statusCode).send({ message: 'Получение пользователя с несуществующим в БД id' });
       } else {
-        res.status(500).send({ message: `Internal server error ${error}` });
+        res.status(ERROR_CODE_500).send({ message: 'Internal server error' });
       }
     });
 };
@@ -62,12 +65,20 @@ module.exports.updateUser = (req, res) => {
 module.exports.updateUserAvatar = (req, res) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
+    .orFail(() => {
+      const error = new Error();
+      error.statusCode = ERROR_CODE_404;
+      throw error;
+    })
     .then((user) => res.send({ data: user }))
     .catch((error) => {
-      if (error.name === 'CastError') {
-        res.status(400).send({ message: `Пользователь с указанным _id не найден ${error}` });
+      if (error.name === 'ValidationError') {
+        res.status(ERROR_CODE_400)
+          .send({ message: `Переданы некорректные данные для обновления аватара ${error.message}` });
+      } else if (error.statusCode === ERROR_CODE_404) {
+        res.status(ERROR_CODE_404).send({ message: 'Пользователь с указанным _id не найден' });
       } else {
-        res.status(500).send({ message: `Internal server error ${error}` });
+        res.status(ERROR_CODE_500).send({ message: 'Internal server error' });
       }
     });
 };

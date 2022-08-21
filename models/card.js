@@ -4,8 +4,8 @@ const cardSchema = new mongoose.Schema({
   name: {
     type: String,
     required: [true, 'Поле "name" должно быть заполнено'],
-    minlength: 2,
-    maxlength: 30,
+    minlength: [2, 'Must be at least 2, got {VALUE}'],
+    maxlength: [30, 'Must be not more then 30, got {VALUE}'],
   },
   link: {
     type: String,

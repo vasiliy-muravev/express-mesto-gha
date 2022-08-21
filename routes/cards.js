@@ -9,18 +9,18 @@ const {
 } = require('../controllers/cards');
 
 /* Возвращает все карточки */
-cardsRoutes.get('/cards', getCards);
+cardsRoutes.get('/', getCards);
 
 /* Создаёт карточку */
-cardsRoutes.post('/cards', createCard);
+cardsRoutes.post('/', createCard);
 
 /* Удаляет карточку по идентификатору */
-cardsRoutes.delete('/cards/:cardId', deleteCard);
+cardsRoutes.delete('/:cardId', deleteCard);
 
 /* Поставить лайк карточке */
-cardsRoutes.put('/cards/:cardId/likes', likeCard);
+cardsRoutes.put('/:cardId/likes', likeCard);
 
 /* Убрать лайк с карточки  */
-cardsRoutes.delete('/cards/:cardId/likes', dislikeCard);
+cardsRoutes.delete('/:cardId/likes', dislikeCard);
 
 module.exports = cardsRoutes;
