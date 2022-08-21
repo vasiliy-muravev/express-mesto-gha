@@ -1,6 +1,12 @@
 const usersRoutes = require('express').Router();
 
-const { getUsers, getUserById, createUser, updateUser, updateUserAvatar } = require('../controllers/users');
+const {
+  getUsers,
+  getUserById,
+  createUser,
+  updateUser,
+  updateUserAvatar,
+} = require('../controllers/users');
 
 /* Возвращает всех пользователей */
 usersRoutes.get('/users', getUsers);
@@ -15,6 +21,6 @@ usersRoutes.post('/users', createUser);
 usersRoutes.patch('/users/me', updateUser);
 
 /* Обновляет профиль */
-// usersRoutes.patch('/users/me/avatar', updateUserAvatar);
+usersRoutes.patch('/users/me/avatar', updateUserAvatar);
 
 module.exports = usersRoutes;
