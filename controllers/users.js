@@ -1,5 +1,8 @@
+const bcrypt = require('bcryptjs');
 const User = require('../models/user');
 const { ERROR_CODE_400, ERROR_CODE_404, ERROR_CODE_500 } = require('../constants/errorCode');
+
+const SALT_ROUNDS = 10;
 
 module.exports.getUsers = (req, res) => {
   User.find({})
@@ -31,19 +34,22 @@ module.exports.createUser = (req, res) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
-  User.create({
-    name, about, avatar, email, password,
-  })
-    .then((user) => res.status(201).send({ data: user }))
-    .catch((error) => {
-      if (error.name === 'ValidationError') {
-        res.status(ERROR_CODE_400)
-          .send({ message: `Переданы некорректные данные для создания пользователя ${error.message}` });
-      } else if (error.name === 'MongoServerError' && error.code === 11000) {
-        res.status(ERROR_CODE_404).send({ message: 'Пользователь с таким email уже существует' });
-      } else {
-        res.status(ERROR_CODE_500).send({ message: 'Internal server error' });
-      }
+  bcrypt.hash(password, SALT_ROUNDS)
+    .then((hash) => {
+      User.create({
+        name, about, avatar, email, password: hash,
+      })
+        .then((user) => res.status(201).send({ data: user }))
+        .catch((error) => {
+          if (error.name === 'ValidationError') {
+            res.status(ERROR_CODE_400)
+              .send({ message: `Переданы некорректные данные для создания пользователя ${error.message}` });
+          } else if (error.name === 'MongoServerError' && error.code === 11000) {
+            res.status(ERROR_CODE_404).send({ message: 'Пользователь с таким email уже существует' });
+          } else {
+            res.status(ERROR_CODE_500).send({ message: 'Internal server error' });
+          }
+        });
     });
 };
 

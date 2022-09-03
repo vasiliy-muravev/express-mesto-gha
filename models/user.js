@@ -4,19 +4,19 @@ const validator = require('validator');
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: [true, 'Поле "name" должно быть заполнено'],
+    default: 'Жак-Ив Кусто',
     minlength: [2, 'Must be at least 2, got {VALUE}'],
     maxlength: [30, 'Must be not more then 30, got {VALUE}'],
   },
   about: {
     type: String,
-    required: [true, 'Поле "about" должно быть заполнено'],
+    default: 'Исследователь',
     minlength: [2, 'Must be at least 2, got {VALUE}'],
     maxlength: [30, 'Must be not more then 30, got {VALUE}'],
   },
   avatar: {
     type: String,
-    required: [true, 'Поле "avatar" должно быть заполнено'],
+    default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
   },
   email: {
     type: String,
