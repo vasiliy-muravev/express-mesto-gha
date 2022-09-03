@@ -28,13 +28,19 @@ module.exports.getUserById = (req, res) => {
 };
 
 module.exports.createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
-  User.create({ name, about, avatar })
+  const {
+    name, about, avatar, email, password,
+  } = req.body;
+  User.create({
+    name, about, avatar, email, password,
+  })
     .then((user) => res.status(201).send({ data: user }))
     .catch((error) => {
       if (error.name === 'ValidationError') {
         res.status(ERROR_CODE_400)
           .send({ message: `Переданы некорректные данные для создания пользователя ${error.message}` });
+      } else if (error.name === 'MongoServerError' && error.code === 11000) {
+        res.status(ERROR_CODE_404).send({ message: 'Пользователь с таким email уже существует' });
       } else {
         res.status(ERROR_CODE_500).send({ message: 'Internal server error' });
       }
