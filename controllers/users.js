@@ -1,8 +1,12 @@
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-const { ERROR_CODE_400, ERROR_CODE_404, ERROR_CODE_500 } = require('../constants/errorCode');
+const {
+  ERROR_CODE_400, ERROR_CODE_401, ERROR_CODE_404, ERROR_CODE_500,
+} = require('../constants/errorCode');
 
 const SALT_ROUNDS = 10;
+const JWT_SECRET = 'Mz4Abegjn0pIe4cjnTySDcMTj0GcagfJgX1jdIzv3Vy';
 
 module.exports.getUsers = (req, res) => {
   User.find({})
@@ -92,5 +96,25 @@ module.exports.updateUserAvatar = (req, res) => {
       } else {
         res.status(ERROR_CODE_500).send({ message: 'Internal server error' });
       }
+    });
+};
+
+module.exports.login = (req, res, next) => {
+  const { email, password } = req.body;
+  if (!email || !password) return res.status(ERROR_CODE_400).send({ message: 'Email или пароль не могут быть пустыми' });
+  User.findOne({ email })
+    .then((user) => {
+      if (!user) return res.status(ERROR_CODE_401).send({ message: 'Неверная почта или пароль' });
+      return bcrypt.compare(password, user.password)
+        .then((isValidPassword) => {
+          if (!isValidPassword) return res.status(ERROR_CODE_401).send({ message: 'Неверная почта или пароль' });
+          const token = jwt.sign({ _id: user.id }, JWT_SECRET, { expiresIn: '7d' });
+          res.cookie('jwt', token, {
+            maxAge: 3600000 * 24 * 7,
+            httpOnly: true,
+          })
+            .send({ token, user });
+        })
+        .catch(next);
     });
 };

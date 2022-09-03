@@ -5,6 +5,8 @@ const { ERROR_CODE_404 } = require('./constants/errorCode');
 const app = express();
 const usersRoutes = require('./routes/users');
 const cardsRoutes = require('./routes/cards');
+const login = require('./routes/users');
+const createUser = require('./routes/users');
 
 mongoose.connect('mongodb://127.0.0.1:27017/mestodb');
 
@@ -19,6 +21,8 @@ app.use((req, res, next) => {
   next();
 });
 
+app.post('/signin', login);
+app.post('/signup', createUser);
 app.use('/users', usersRoutes);
 app.use('/cards', cardsRoutes);
 
