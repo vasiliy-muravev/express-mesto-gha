@@ -105,10 +105,14 @@ module.exports.login = (req, res, next) => {
   User.findOne({ email })
     .then((user) => {
       if (!user) return res.status(ERROR_CODE_401).send({ message: 'Неверная почта или пароль' });
+
       return bcrypt.compare(password, user.password)
+
         .then((isValidPassword) => {
           if (!isValidPassword) return res.status(ERROR_CODE_401).send({ message: 'Неверная почта или пароль' });
+
           const token = jwt.sign({ _id: user.id }, JWT_SECRET, { expiresIn: '7d' });
+
           res.cookie('jwt', token, {
             maxAge: 3600000 * 24 * 7,
             httpOnly: true,

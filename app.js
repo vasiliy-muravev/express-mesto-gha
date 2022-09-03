@@ -1,5 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const cookieParser = require('cookie-parser');
 const { ERROR_CODE_404 } = require('./constants/errorCode');
 
 const app = express();
@@ -7,12 +8,13 @@ const usersRoutes = require('./routes/users');
 const cardsRoutes = require('./routes/cards');
 const login = require('./routes/users');
 const createUser = require('./routes/users');
+const auth = require('./middlewares/auth');
 
 mongoose.connect('mongodb://127.0.0.1:27017/mestodb');
 
 app.use(express.json());
+app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
-
 app.use((req, res, next) => {
   req.user = {
     _id: '6301f358d32f17b45a8918b8',
@@ -21,8 +23,10 @@ app.use((req, res, next) => {
   next();
 });
 
+
 app.post('/signin', login);
 app.post('/signup', createUser);
+app.use(auth);
 app.use('/users', usersRoutes);
 app.use('/cards', cardsRoutes);
 
