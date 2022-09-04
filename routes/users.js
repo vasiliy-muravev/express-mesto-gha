@@ -7,10 +7,14 @@ const {
   updateUser,
   updateUserAvatar,
   login,
+  getUser,
 } = require('../controllers/users');
 
 /* Возвращает всех пользователей */
 usersRoutes.get('/', getUsers);
+
+/* Получение информации о пользователе */
+usersRoutes.get('/me', getUser);
 
 /* Возвращает пользователя по _id */
 usersRoutes.get('/:userId', getUserById);

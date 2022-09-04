@@ -122,3 +122,23 @@ module.exports.login = (req, res, next) => {
         .catch(next);
     });
 };
+
+module.exports.getUser = (req, res) => {
+  const userId = req.user._id;
+  User.findById(userId)
+    .orFail(() => {
+      const error = new Error();
+      error.statusCode = ERROR_CODE_404;
+      throw error;
+    })
+    .then((user) => res.send({ data: user }))
+    .catch((error) => {
+      if (error.name === 'CastError') {
+        res.status(ERROR_CODE_400).send({ message: 'Получение пользователя с некорректным id' });
+      } else if (error.statusCode === ERROR_CODE_404) {
+        res.status(error.statusCode).send({ message: 'Получение пользователя с несуществующим в БД id' });
+      } else {
+        res.status(ERROR_CODE_500).send({ message: 'Internal server error' });
+      }
+    });
+};
