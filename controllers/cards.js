@@ -1,36 +1,35 @@
 const Card = require('../models/card');
-const {
-  ERROR_CODE_400, ERROR_CODE_404, ERROR_CODE_500,
-  ERROR_CODE_403,
-} = require('../constants/errorCode');
+const { ERROR_CODE_404 } = require('../constants/errorCode');
+const ForbiddenError = require('../errors/forbidden-err');
+const BadRequestError = require('../errors/bad-request-err');
+const NotFoundError = require('../errors/not-found-err');
 
-module.exports.getCards = (req, res) => {
+module.exports.getCards = (req, res, next) => {
   Card.find({})
     .then((cards) => res.send({ data: cards }))
-    .catch(() => res.status(ERROR_CODE_500).send({ message: 'Internal server error' }));
+    .catch((error) => next(error));
 };
 
-module.exports.createCard = (req, res) => {
+module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
   Card.create({ name, link, owner: req.user._id })
     .then((card) => res.status(201).send({ data: card }))
     .catch((error) => {
       if (error.name === 'ValidationError') {
-        res.status(ERROR_CODE_400)
-          .send({ message: `Переданы некорректные данные для создания карточки ${error.message}` });
+        next(new BadRequestError(`Переданы некорректные данные для создания карточки ${error.message}`));
       } else {
-        res.status(ERROR_CODE_500).send({ message: 'Internal server error' });
+        next(error);
       }
     });
 };
 
-module.exports.deleteCard = (req, res) => {
+module.exports.deleteCard = (req, res, next) => {
   const { cardId } = req.params;
 
   Card.findById(cardId)
     .then((card) => {
       if (card && req.user._id !== card.owner.toString()) {
-        res.status(ERROR_CODE_403).send({ message: 'Нельзя удалить карточку другого пользователя' });
+        next(new ForbiddenError('Нельзя удалить карточку другого пользователя'));
       } else {
         Card.findByIdAndDelete(cardId)
           .orFail(() => {
@@ -41,19 +40,19 @@ module.exports.deleteCard = (req, res) => {
           .then((deletedCard) => res.send({ data: deletedCard }))
           .catch((error) => {
             if (error.name === 'CastError') {
-              res.status(ERROR_CODE_400).send({ message: 'Удаление карточки с некорректным id' });
+              next(new BadRequestError('Удаление карточки с некорректным id'));
             } else if (error.statusCode === ERROR_CODE_404) {
-              res.status(error.statusCode).send({ message: 'Удаление карточки с несуществующим в БД id' });
+              next(new NotFoundError('Удаление карточки с несуществующим в БД id'));
             } else {
-              res.status(ERROR_CODE_500).send({ message: 'Internal server error' });
+              next(error);
             }
           });
       }
     })
-    .catch(() => res.status(ERROR_CODE_500).send({ message: 'Internal server error' }));
+    .catch((error) => next(error));
 };
 
-module.exports.likeCard = (req, res) => {
+module.exports.likeCard = (req, res, next) => {
   const { cardId } = req.params;
   Card.findByIdAndUpdate(
     cardId,
@@ -68,16 +67,16 @@ module.exports.likeCard = (req, res) => {
     .then((card) => res.send({ data: card }))
     .catch((error) => {
       if (error.name === 'CastError') {
-        res.status(ERROR_CODE_400).send({ message: 'Добавление лайка с некорректным id карточки' });
+        next(new BadRequestError('Добавление лайка с некорректным id карточки'));
       } else if (error.statusCode === ERROR_CODE_404) {
-        res.status(error.statusCode).send({ message: 'Добавление лайка с несуществующим в БД id карточки' });
+        next(new NotFoundError('Добавление лайка с несуществующим в БД id карточки'));
       } else {
-        res.status(ERROR_CODE_500).send({ message: 'Internal server error' });
+        next(error);
       }
     });
 };
 
-module.exports.dislikeCard = (req, res) => {
+module.exports.dislikeCard = (req, res, next) => {
   const { cardId } = req.params;
   Card.findByIdAndUpdate(
     cardId,
@@ -92,11 +91,11 @@ module.exports.dislikeCard = (req, res) => {
     .then((card) => res.send({ data: card }))
     .catch((error) => {
       if (error.name === 'CastError') {
-        res.status(ERROR_CODE_400).send({ message: 'Удаление лайка с некорректным id карточки' });
+        next(new BadRequestError('Удаление лайка с некорректным id карточки'));
       } else if (error.statusCode === ERROR_CODE_404) {
-        res.status(error.statusCode).send({ message: 'Удаление лайка с несуществующим в БД id карточки' });
+        next(new NotFoundError('Удаление лайка с несуществующим в БД id карточки'));
       } else {
-        res.status(ERROR_CODE_500).send({ message: 'Internal server error' });
+        next(error);
       }
     });
 };

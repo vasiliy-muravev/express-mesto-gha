@@ -5,6 +5,7 @@ const { ERROR_CODE_404 } = require('../constants/errorCode');
 const BadRequestError = require('../errors/bad-request-err');
 const NotFoundError = require('../errors/not-found-err');
 const UnauthorizedError = require('../errors/unauthorized-err');
+const ConflictError = require('../errors/conflict-err');
 
 const SALT_ROUNDS = 10;
 const JWT_SECRET = 'Mz4Abegjn0pIe4cjnTySDcMTj0GcagfJgX1jdIzv3Vy';
@@ -49,7 +50,7 @@ module.exports.createUser = (req, res, next) => {
           if (error.name === 'ValidationError') {
             next(new BadRequestError(`Переданы некорректные данные для создания пользователя ${error.message}`));
           } else if (error.name === 'MongoServerError' && error.code === 11000) {
-            next(new NotFoundError('Пользователь с таким email уже существует'));
+            next(new ConflictError('Пользователь с таким email уже существует'));
           } else {
             next(error);
           }
