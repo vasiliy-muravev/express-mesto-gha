@@ -2,7 +2,6 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 const { errors } = require('celebrate');
-const { ERROR_CODE_404 } = require('./constants/errorCode');
 
 const app = express();
 const usersRoutes = require('./routes/users');
