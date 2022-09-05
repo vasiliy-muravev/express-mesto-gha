@@ -10,6 +10,7 @@ const cardsRoutes = require('./routes/cards');
 const login = require('./routes/users');
 const createUser = require('./routes/users');
 const auth = require('./middlewares/auth');
+const NotFoundError = require('./errors/not-found-err');
 
 mongoose.connect('mongodb://127.0.0.1:27017/mestodb');
 
@@ -28,8 +29,8 @@ app.use((err, req, res, next) => {
   res.status(err.statusCode).send({ message: err.message });
 });
 
-app.use((req, res) => {
-  res.status(ERROR_CODE_404).send({ message: 'Страница по указанному маршруту не найдена' });
+app.use((req, res, next) => {
+  next(new NotFoundError('Страница по указанному маршруту не найдена'));
 });
 
 app.listen(3000);
