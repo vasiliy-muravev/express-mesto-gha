@@ -1,5 +1,8 @@
 const Card = require('../models/card');
-const { ERROR_CODE_400, ERROR_CODE_404, ERROR_CODE_500 } = require('../constants/errorCode');
+const {
+  ERROR_CODE_400, ERROR_CODE_404, ERROR_CODE_500,
+  ERROR_CODE_403,
+} = require('../constants/errorCode');
 
 module.exports.getCards = (req, res) => {
   Card.find({})
@@ -23,22 +26,31 @@ module.exports.createCard = (req, res) => {
 
 module.exports.deleteCard = (req, res) => {
   const { cardId } = req.params;
-  Card.findByIdAndDelete(cardId)
-    .orFail(() => {
-      const error = new Error();
-      error.statusCode = ERROR_CODE_404;
-      throw error;
-    })
-    .then((card) => res.send({ data: card }))
-    .catch((error) => {
-      if (error.name === 'CastError') {
-        res.status(ERROR_CODE_400).send({ message: 'Удаление карточки с некорректным id' });
-      } else if (error.statusCode === ERROR_CODE_404) {
-        res.status(error.statusCode).send({ message: 'Удаление карточки с несуществующим в БД id' });
+
+  Card.findById(cardId)
+    .then((card) => {
+      if (card && req.user._id !== card.owner.toString()) {
+        res.status(ERROR_CODE_403).send({ message: 'Нельзя удалить карточку другого пользователя' });
       } else {
-        res.status(ERROR_CODE_500).send({ message: 'Internal server error' });
+        Card.findByIdAndDelete(cardId)
+          .orFail(() => {
+            const error = new Error();
+            error.statusCode = ERROR_CODE_404;
+            throw error;
+          })
+          .then((deletedCard) => res.send({ data: deletedCard }))
+          .catch((error) => {
+            if (error.name === 'CastError') {
+              res.status(ERROR_CODE_400).send({ message: 'Удаление карточки с некорректным id' });
+            } else if (error.statusCode === ERROR_CODE_404) {
+              res.status(error.statusCode).send({ message: 'Удаление карточки с несуществующим в БД id' });
+            } else {
+              res.status(ERROR_CODE_500).send({ message: 'Internal server error' });
+            }
+          });
       }
-    });
+    })
+    .catch(() => res.status(ERROR_CODE_500).send({ message: 'Internal server error' }));
 };
 
 module.exports.likeCard = (req, res) => {

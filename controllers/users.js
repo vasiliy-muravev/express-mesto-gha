@@ -101,15 +101,14 @@ module.exports.updateUserAvatar = (req, res) => {
 
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
-  if (!email || !password) return res.status(ERROR_CODE_400).send({ message: 'Email или пароль не могут быть пустыми' });
+  if (!email || !password) res.status(ERROR_CODE_400).send({ message: 'Email или пароль не могут быть пустыми' });
   User.findOne({ email })
     .then((user) => {
-      if (!user) return res.status(ERROR_CODE_401).send({ message: 'Неверная почта или пароль' });
+      if (!user) res.status(ERROR_CODE_401).send({ message: 'Неверная почта или пароль' });
 
       return bcrypt.compare(password, user.password)
-
         .then((isValidPassword) => {
-          if (!isValidPassword) return res.status(ERROR_CODE_401).send({ message: 'Неверная почта или пароль' });
+          if (!isValidPassword) res.status(ERROR_CODE_401).send({ message: 'Неверная почта или пароль' });
 
           const token = jwt.sign({ _id: user.id }, JWT_SECRET, { expiresIn: '7d' });
 
