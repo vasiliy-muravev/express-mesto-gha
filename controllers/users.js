@@ -43,7 +43,7 @@ module.exports.createUser = (req, res) => {
       User.create({
         name, about, avatar, email, password: hash,
       })
-        .then((user) => res.status(201).send({ data: user }))
+        .then((user) => res.status(201).send({ data: user.deletePasswordFromUser() }))
         .catch((error) => {
           if (error.name === 'ValidationError') {
             res.status(ERROR_CODE_400)
@@ -102,7 +102,7 @@ module.exports.updateUserAvatar = (req, res) => {
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
   if (!email || !password) res.status(ERROR_CODE_400).send({ message: 'Email или пароль не могут быть пустыми' });
-  User.findOne({ email })
+  User.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) res.status(ERROR_CODE_401).send({ message: 'Неверная почта или пароль' });
 

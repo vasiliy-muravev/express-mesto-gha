@@ -9,7 +9,7 @@ module.exports = (req, res, next) => {
   const token = req.cookies.jwt;
 
   if (!token) {
-    return res.status(ERROR_CODE_401).send({ message: 'Необходима авторизация' });
+    res.status(ERROR_CODE_401).send({ message: 'Необходима авторизация' });
   }
 
   let payload;
@@ -17,7 +17,7 @@ module.exports = (req, res, next) => {
   try {
     payload = jwt.verify(token, JWT_SECRET);
   } catch (err) {
-    return res.status(ERROR_CODE_401).send({ message: 'Необходима авторизация' });
+    res.status(ERROR_CODE_401).send({ message: 'Необходима авторизация' });
   }
 
   req.user = payload;
