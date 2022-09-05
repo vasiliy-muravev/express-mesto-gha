@@ -21,6 +21,10 @@ app.use(auth);
 app.use('/users', usersRoutes);
 app.use('/cards', cardsRoutes);
 
+app.use((err, req, res) => {
+  res.status(err.statusCode).send({ message: err.message });
+});
+
 app.use((req, res) => {
   res.status(ERROR_CODE_404).send({ message: 'Страница по указанному маршруту не найдена' });
 });

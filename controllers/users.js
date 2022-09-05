@@ -4,6 +4,8 @@ const User = require('../models/user');
 const {
   ERROR_CODE_400, ERROR_CODE_401, ERROR_CODE_404, ERROR_CODE_500,
 } = require('../constants/errorCode');
+const BadRequestError = require('../errors/bad-request-err');
+const NotFoundError = require('../errors/not-found-err');
 
 const SALT_ROUNDS = 10;
 const JWT_SECRET = 'Mz4Abegjn0pIe4cjnTySDcMTj0GcagfJgX1jdIzv3Vy';
@@ -34,7 +36,7 @@ module.exports.getUserById = (req, res) => {
     });
 };
 
-module.exports.createUser = (req, res) => {
+module.exports.createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
@@ -46,12 +48,17 @@ module.exports.createUser = (req, res) => {
         .then((user) => res.status(201).send({ data: user.deletePasswordFromUser() }))
         .catch((error) => {
           if (error.name === 'ValidationError') {
-            res.status(ERROR_CODE_400)
-              .send({ message: `Переданы некорректные данные для создания пользователя ${error.message}` });
+            next(new BadRequestError('Переданы некорректные данные для создания пользователя'));
+            // res.status(ERROR_CODE_400)
+            // eslint-disable-next-line max-len
+            //   .send({ message: `Переданы некорректные данные для создания пользователя ${error.message}` });
           } else if (error.name === 'MongoServerError' && error.code === 11000) {
-            res.status(ERROR_CODE_404).send({ message: 'Пользователь с таким email уже существует' });
+            next(new NotFoundError('Пользователь с таким email уже существует'));
+            // eslint-disable-next-line max-len
+            // res.status(ERROR_CODE_404).send({ message: 'Пользователь с таким email уже существует' });
           } else {
-            res.status(ERROR_CODE_500).send({ message: 'Internal server error' });
+            next(error);
+            // res.status(ERROR_CODE_500).send({ message: 'Internal server error' });
           }
         });
     });
