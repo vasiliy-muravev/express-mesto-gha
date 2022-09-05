@@ -38,7 +38,15 @@ module.exports.deleteCard = (req, res, next) => {
             throw error;
           })
           .then((deletedCard) => res.send({ data: deletedCard }))
-          .catch((error) => next(error));
+          .catch((error) => {
+            if (error.name === 'CastError') {
+              next(new BadRequestError('Удаление карточки с некорректным id'));
+            } else if (error.statusCode === ERROR_CODE_404) {
+              next(new NotFoundError('Удаление карточки с несуществующим в БД id'));
+            } else {
+              next(error);
+            }
+          });
       }
     })
     .catch((error) => {

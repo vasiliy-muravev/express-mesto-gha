@@ -41,7 +41,7 @@ usersRoutes.patch('/me/avatar', celebrate({
 /* Логин */
 usersRoutes.post('/signin', celebrate({
   body: Joi.object().keys({
-    email: Joi.string().required().email(),
+    email: Joi.string().required(),
     password: Joi.string().required(),
   }),
 }), login);
