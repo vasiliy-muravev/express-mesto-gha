@@ -20,12 +20,24 @@ cardsRoutes.post('/', celebrate({
 }), createCard);
 
 /* Удаляет карточку по идентификатору */
-cardsRoutes.delete('/:cardId', deleteCard);
+cardsRoutes.delete('/:cardId', celebrate({
+  params: Joi.object().keys({
+    cardId: Joi.string().hex().length(24),
+  }),
+}), deleteCard);
 
 /* Поставить лайк карточке */
-cardsRoutes.put('/:cardId/likes', likeCard);
+cardsRoutes.put('/:cardId/likes', celebrate({
+  params: Joi.object().keys({
+    cardId: Joi.string().hex().length(24),
+  }),
+}), likeCard);
 
 /* Убрать лайк с карточки  */
-cardsRoutes.delete('/:cardId/likes', dislikeCard);
+cardsRoutes.delete('/:cardId/likes', celebrate({
+  params: Joi.object().keys({
+    cardId: Joi.string().hex().length(24),
+  }),
+}), dislikeCard);
 
 module.exports = cardsRoutes;

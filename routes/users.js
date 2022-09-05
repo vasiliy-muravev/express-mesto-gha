@@ -17,7 +17,11 @@ usersRoutes.get('/', getUsers);
 usersRoutes.get('/me', getUser);
 
 /* Возвращает пользователя по _id */
-usersRoutes.get('/:userId', getUserById);
+usersRoutes.get('/:userId', celebrate({
+  params: Joi.object().keys({
+    userId: Joi.string().hex().length(24),
+  }),
+}), getUserById);
 
 /* Обновляет профиль */
 usersRoutes.patch('/me', celebrate({
