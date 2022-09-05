@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
+const { errors } = require('celebrate');
 const { ERROR_CODE_404 } = require('./constants/errorCode');
 
 const app = express();
@@ -21,6 +22,7 @@ app.use(auth);
 app.use('/users', usersRoutes);
 app.use('/cards', cardsRoutes);
 
+app.use(errors());
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
   res.status(err.statusCode).send({ message: err.message });

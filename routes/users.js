@@ -1,5 +1,5 @@
 const usersRoutes = require('express').Router();
-
+const { celebrate, Joi } = require('celebrate');
 const {
   getUsers,
   getUserById,
@@ -20,15 +20,37 @@ usersRoutes.get('/me', getUser);
 usersRoutes.get('/:userId', getUserById);
 
 /* Обновляет профиль */
-usersRoutes.patch('/me', updateUser);
+usersRoutes.patch('/me', celebrate({
+  body: Joi.object().keys({
+    name: Joi.string().min(2).max(30),
+    about: Joi.string().min(2).max(30),
+  }),
+}), updateUser);
 
 /* Обновляет профиль */
-usersRoutes.patch('/me/avatar', updateUserAvatar);
+usersRoutes.patch('/me/avatar', celebrate({
+  body: Joi.object().keys({
+    avatar: Joi.string().pattern(/^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w.-]+)+[\w\-._~:/?#[\]@!$&'()*+,;=.]+$/),
+  }),
+}), updateUserAvatar);
 
 /* Логин */
-usersRoutes.post('/signin', login);
+usersRoutes.post('/signin', celebrate({
+  body: Joi.object().keys({
+    email: Joi.string().required().email(),
+    password: Joi.string().required(),
+  }),
+}), login);
 
 /* Регистрация */
-usersRoutes.post('/signup', createUser);
+usersRoutes.post('/signup', celebrate({
+  body: Joi.object().keys({
+    name: Joi.string().min(2).max(30),
+    about: Joi.string().min(2).max(30),
+    avatar: Joi.string().pattern(/^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w.-]+)+[\w\-._~:/?#[\]@!$&'()*+,;=.]+$/),
+    email: Joi.string().required().email(),
+    password: Joi.string().required(),
+  }),
+}), createUser);
 
 module.exports = usersRoutes;
