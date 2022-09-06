@@ -49,7 +49,8 @@ module.exports.createUser = (req, res, next) => {
             next(error);
           }
         });
-    });
+    })
+    .catch(next);
 };
 
 module.exports.updateUser = (req, res, next) => {
@@ -82,24 +83,22 @@ module.exports.updateUserAvatar = (req, res, next) => {
 
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
-  if (!email || !password) {
-    next(new BadRequestError('Email или пароль не могут быть пустыми'));
-  }
+
   User.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
-        next(new UnauthorizedError('Неверная почта или пароль'));
+        return next(new UnauthorizedError('Неверная почта или пароль'));
       }
 
       return bcrypt.compare(password, user.password)
         .then((isValidPassword) => {
           if (!isValidPassword) {
-            next(new UnauthorizedError('Неверная почта или пароль'));
+            return next(new UnauthorizedError('Неверная почта или пароль'));
           }
 
           const token = jwt.sign({ _id: user.id }, JWT_SECRET, { expiresIn: '7d' });
 
-          res.cookie('jwt', token, {
+          return res.cookie('jwt', token, {
             maxAge: 3600000 * 24 * 7,
             httpOnly: true,
           })

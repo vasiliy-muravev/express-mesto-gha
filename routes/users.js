@@ -7,6 +7,7 @@ const {
   updateUser,
   updateUserAvatar,
   login,
+  signout,
   getUser,
 } = require('../controllers/users');
 

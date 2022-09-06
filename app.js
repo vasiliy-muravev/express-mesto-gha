@@ -2,7 +2,6 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 const { errors } = require('celebrate');
-const { ERROR_CODE_404 } = require('./constants/errorCode');
 
 const app = express();
 const usersRoutes = require('./routes/users');
@@ -10,6 +9,8 @@ const cardsRoutes = require('./routes/cards');
 const login = require('./routes/users');
 const createUser = require('./routes/users');
 const auth = require('./middlewares/auth');
+const error = require('./middlewares/error');
+const NotFoundError = require('./errors/not-found-err');
 
 mongoose.connect('mongodb://127.0.0.1:27017/mestodb');
 
@@ -21,15 +22,16 @@ app.post('/signup', createUser);
 app.use(auth);
 app.use('/users', usersRoutes);
 app.use('/cards', cardsRoutes);
+app.get('/signout', (req, res) => {
+  res.clearCookie('jwt').send({ message: 'Выход' });
+});
 
+app.use((req, res, next) => {
+  next(new NotFoundError('Страница по указанному маршруту не найдена'));
+});
+/* Обработчик валидации от celebrate */
 app.use(errors());
-// eslint-disable-next-line no-unused-vars
-app.use((err, req, res, next) => {
-  res.status(err.statusCode).send({ message: err.message });
-});
-
-app.use((req, res) => {
-  res.status(ERROR_CODE_404).send({ message: 'Страница по указанному маршруту не найдена' });
-});
+/* Кастомый обработчик ошибок */
+app.use(error);
 
 app.listen(3000);
