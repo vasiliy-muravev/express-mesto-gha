@@ -55,17 +55,11 @@ module.exports.createUser = (req, res, next) => {
 module.exports.updateUser = (req, res, next) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
-    .orFail(() => {
-      const error = new Error();
-      error.statusCode = ERROR_CODE_404;
-      throw error;
-    })
+    .orFail(() => new NotFoundError('Пользователь с указанным id не существует'))
     .then((user) => res.send({ data: user }))
     .catch((error) => {
       if (error.name === 'ValidationError') {
         next(new BadRequestError(`Переданы некорректные данные для изменения данных пользователя ${error.message}`));
-      } else if (error.statusCode === ERROR_CODE_404) {
-        next(new NotFoundError('Пользователь с указанным id не существует'));
       } else {
         next(error);
       }
@@ -75,17 +69,11 @@ module.exports.updateUser = (req, res, next) => {
 module.exports.updateUserAvatar = (req, res, next) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
-    .orFail(() => {
-      const error = new Error();
-      error.statusCode = ERROR_CODE_404;
-      throw error;
-    })
+    .orFail(() => new NotFoundError('Пользователь с указанным id не существует'))
     .then((user) => res.send({ data: user }))
     .catch((error) => {
       if (error.name === 'ValidationError') {
         next(new BadRequestError(`Переданы некорректные данные для обновления аватара ${error.message}`));
-      } else if (error.statusCode === ERROR_CODE_404) {
-        next(new NotFoundError('Пользователь с указанным id не существует'));
       } else {
         next(error);
       }
@@ -124,17 +112,11 @@ module.exports.login = (req, res, next) => {
 module.exports.getUser = (req, res, next) => {
   const userId = req.user._id;
   User.findById(userId)
-    .orFail(() => {
-      const error = new Error();
-      error.statusCode = ERROR_CODE_404;
-      throw error;
-    })
+    .orFail(() => new NotFoundError('Пользователь с указанным id не существует'))
     .then((user) => res.send({ data: user }))
     .catch((error) => {
       if (error.name === 'CastError') {
         next(new BadRequestError('Получение пользователя с некорректным id'));
-      } else if (error.statusCode === ERROR_CODE_404) {
-        next(new NotFoundError('Пользователь с указанным id не существует'));
       } else {
         next(error);
       }

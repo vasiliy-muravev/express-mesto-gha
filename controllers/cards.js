@@ -53,13 +53,11 @@ module.exports.likeCard = (req, res, next) => {
     { $addToSet: { likes: req.user._id } },
     { new: true, runValidators: true },
   )
-    .orFail(() => new NotFoundError('Пользователь с указанным id не существует'))
+    .orFail(() => new NotFoundError('Карточка с указанным id не существует'))
     .then((card) => res.send({ data: card }))
     .catch((error) => {
       if (error.name === 'CastError') {
         next(new BadRequestError('Добавление лайка с некорректным id карточки'));
-      } else if (error.statusCode === ERROR_CODE_404) {
-        next(new NotFoundError('Добавление лайка с несуществующим в БД id карточки'));
       } else {
         next(error);
       }
@@ -73,17 +71,11 @@ module.exports.dislikeCard = (req, res, next) => {
     { $pull: { likes: req.user._id } },
     { new: true, runValidators: true },
   )
-    .orFail(() => {
-      const error = new Error();
-      error.statusCode = ERROR_CODE_404;
-      throw error;
-    })
+    .orFail(() => new NotFoundError('Карточка с указанным id не существует'))
     .then((card) => res.send({ data: card }))
     .catch((error) => {
       if (error.name === 'CastError') {
         next(new BadRequestError('Удаление лайка с некорректным id карточки'));
-      } else if (error.statusCode === ERROR_CODE_404) {
-        next(new NotFoundError('Удаление лайка с несуществующим в БД id карточки'));
       } else {
         next(error);
       }
