@@ -27,37 +27,23 @@ module.exports.deleteCard = (req, res, next) => {
   const { cardId } = req.params;
 
   Card.findById(cardId)
+    .orFail(() => new NotFoundError('Карточка с указанным id не существует'))
     .then((card) => {
       if (card && req.user._id !== card.owner.toString()) {
         next(new ForbiddenError('Нельзя удалить карточку другого пользователя'));
       } else {
         Card.findByIdAndDelete(cardId)
-          .orFail(() => {
-            const error = new Error();
-            error.statusCode = ERROR_CODE_404;
-            throw error;
-          })
           .then((deletedCard) => res.send({ data: deletedCard }))
           .catch((error) => {
             if (error.name === 'CastError') {
               next(new BadRequestError('Удаление карточки с некорректным id'));
-            } else if (error.statusCode === ERROR_CODE_404) {
-              next(new NotFoundError('Удаление карточки с несуществующим в БД id'));
             } else {
               next(error);
             }
           });
       }
     })
-    .catch((error) => {
-      if (error.name === 'CastError') {
-        next(new BadRequestError('Удаление карточки с некорректным id'));
-      } else if (error.statusCode === ERROR_CODE_404) {
-        next(new NotFoundError('Удаление карточки с несуществующим в БД id'));
-      } else {
-        next(error);
-      }
-    });
+    .catch(next);
 };
 
 module.exports.likeCard = (req, res, next) => {
@@ -67,11 +53,7 @@ module.exports.likeCard = (req, res, next) => {
     { $addToSet: { likes: req.user._id } },
     { new: true, runValidators: true },
   )
-    .orFail(() => {
-      const error = new Error();
-      error.statusCode = ERROR_CODE_404;
-      throw error;
-    })
+    .orFail(() => new NotFoundError('Пользователь с указанным id не существует'))
     .then((card) => res.send({ data: card }))
     .catch((error) => {
       if (error.name === 'CastError') {
